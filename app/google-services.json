@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "446729874437",
+    "project_id": "mealz-app-d1a49",
+    "storage_bucket": "mealz-app-d1a49.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:446729874437:android:238219b1a81410f423806c",
+        "android_client_info": {
+          "package_name": "com.sample.mealexplorer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLUEDihGpQMMPqktkOec9Bva2Xz7GslTQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
