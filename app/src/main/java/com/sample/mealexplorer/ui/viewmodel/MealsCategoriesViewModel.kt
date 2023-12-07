@@ -1,10 +1,12 @@
 package com.sample.mealexplorer.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sample.mealexplorer.data.models.CategoryUiModel
 import com.sample.mealexplorer.data.repository.MealsRepository
 import com.sample.mealexplorer.data.wrappers.ResponseWrapper
+import com.sample.mealexplorer.ui.states.FilterUiState
 import com.sample.mealexplorer.ui.states.MealsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -22,8 +24,10 @@ class MealsCategoriesViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(MealsUiState())
     val uiState = _uiState.asStateFlow()
 
+
     init {
         getMealsCategories()
+//        getMealsFilter("seafood")
     }
 
     private fun getMealsCategories() {
@@ -53,6 +57,7 @@ class MealsCategoriesViewModel @Inject constructor(
 
 
     }
+
 
     fun onCategoryExpanded(categoryUiModel: CategoryUiModel) {
         mealsRepository.setCategoryExpanded(categoryUiModel)

@@ -16,3 +16,7 @@ data class Category(
     fun toUiModel() = CategoryUiModel(id, name, description, imageUrl)
 
 }
+
+
+
+

@@ -7,6 +7,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.stream.MalformedJsonException
 import com.sample.mealexplorer.data.models.Category
+import com.sample.mealexplorer.data.models.Meal
 import com.sample.mealexplorer.data.models.MealsResponse
 import com.sample.mealexplorer.data.wrappers.ResponseWrapper
 import com.sample.mealzapp.BuildConfig
@@ -26,6 +27,13 @@ class MealsNetworkDataSourceImpl @Inject constructor(
             is ResponseWrapper.Success -> ResponseWrapper.Success(response.data?.categories)
         }
     }
+
+//    override suspend fun getMealsFilter(st): ResponseWrapper<List<Meal>> {
+//        return when (val response = mealsApi.getMealsFilter().callWithExceptionHandling()) {
+//            is ResponseWrapper.Error -> ResponseWrapper.Error(response.exception)
+//            is ResponseWrapper.Success -> ResponseWrapper.Success(response.data?.meals)
+//        }
+//    }
 
     /**
      * This method will execute the `Call<T>` and handle the exceptions

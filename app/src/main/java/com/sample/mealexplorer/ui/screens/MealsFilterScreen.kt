@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,6 +39,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,14 +73,63 @@ import com.sample.mealexplorer.ui.states.MealsUiState
 import com.sample.mealexplorer.ui.theme.MealzAppTheme
 import com.sample.mealexplorer.ui.viewmodel.MealsCategoriesViewModel
 import androidx.compose.runtime.MutableState
+import com.sample.mealexplorer.data.models.FilterResponse
+import com.sample.mealexplorer.data.models.Meal
+import com.sample.mealexplorer.data.models.MealUiModel
+import com.sample.mealexplorer.data.models.MealsResponse
+import com.sample.mealexplorer.data.network.ApiService
+import com.sample.mealexplorer.data.network.MealsApi
+import com.sample.mealexplorer.ui.states.FilterUiState
+import com.sample.mealexplorer.ui.viewmodel.MealsFilterViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.Locale
 
+object EmptyData{
+    val filterResponse=FilterResponse(arrayListOf(
+           ))
 
+}
 @Composable
-fun MealsCategoriesScreen(navController: NavHostController? = null) {
+fun getData(category:String){
+//    var mealsResponse by remember { mutableStateOf<FilterResponse?>(emptyData.filterResponse) }
 
-    val viewModel = hiltViewModel<MealsCategoriesViewModel>()
-    val uiState by viewModel.uiState.collectAsState()
+//    CoroutineScope(Dispatchers.IO).launch {
+////        val mealsApi = ApiClient.getInstance().create(ApiService::class.java)
+////        val result = mealsApi.getMealsFilter(category)
+////        Log.d("ayush: ", result.body().toString())
+////        Log.d("ayush error: ", result.errorBody().toString().toString())
+////        if (result.body() != null && result.isSuccessful) {
+////            mealsResponse = result.body()!!
+////
+////            Log.d("ayush: ", result.body()!!.meals.toString())
+////
+////        }
+//    }
+}
+@Composable
+fun MealsFilterScreen(category: CategoryUiModel, navController: NavHostController) {
+
+    var emptyData = EmptyData;
+//    val viewModel = hiltViewModel<MealsFilterViewModel>()
+//    viewModel.getMealsFilter(category.name)
+    var mealsResponse by remember { mutableStateOf<FilterResponse?>(emptyData.filterResponse) }
+    CoroutineScope(Dispatchers.IO).launch {
+        val mealsApi = ApiClient.getInstance().create(ApiService::class.java)
+        val result = mealsApi.getMealsFilter(category.name)
+        Log.d("ayush: ", result.body().toString())
+        Log.d("ayush error: ", result.errorBody().toString().toString())
+        if (result.body() != null && result.isSuccessful) {
+            mealsResponse = result.body()!!
+
+            Log.d("ayush: ", result.body()!!.meals.toString())
+
+        }
+    }
+
+
+//    val uiState by viewModel.uiState1.collectAsState()
     val textState = remember { mutableStateOf(TextFieldValue("")) }
     Log.d("data value", textState.value.text)
     Column {
@@ -118,76 +169,69 @@ fun MealsCategoriesScreen(navController: NavHostController? = null) {
         SearchView(state = textState)
 
         Spacer(modifier = Modifier.height(10.dp))
-        when (uiState.state) {
-            MealsUiState.State.None,
-            MealsUiState.State.Loading -> ProgressErrorView(isProgress = true)
+//        when (uiState.state) {
+//            FilterUiState.State.None,
+//            FilterUiState.State.Loading -> ProgressErrorView(isProgress = true)
+//
+//            FilterUiState.State.Empty -> ProgressErrorView(message = stringResource(R.string.empty_categories))
+//            FilterUiState.State.Error -> ProgressErrorView(message = uiState.error?.localizedMessage.toString())
+//            FilterUiState.State.Success -> {
+////                var data: ArrayList<CategoryUiModel> = ArrayList()
+////                uiState.data.forEach {
+////                    if ("1" != it.id) {
+////                        data.add(it)
+////                    }
+////                }
 
-            MealsUiState.State.Empty -> ProgressErrorView(message = stringResource(R.string.empty_categories))
-            MealsUiState.State.Error -> ProgressErrorView(message = uiState.error?.localizedMessage.toString())
-            MealsUiState.State.Success -> {
-                var data: ArrayList<CategoryUiModel> = ArrayList()
-                uiState.data.forEach {
-                    if ("1" != it.id) {
-                        data.add(it)
-                    }
-                }
+
+                var filteredData: ArrayList<Meal> = ArrayList()
 
 
-                var filteredData: ArrayList<CategoryUiModel> = ArrayList()
-
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
+                LazyColumn(
+//                    columns = GridCells.Fixed(2),
                     contentPadding = PaddingValues(dimensionResource(R.dimen.lazy_column_padding))
                 ) {
                     val searchedText = textState.value.text
                     if (searchedText.isEmpty()) {
-                        filteredData.addAll(data)
+                        mealsResponse?.meals?.let { filteredData.addAll(it) }
                     } else {
-                        val resultList = ArrayList<CategoryUiModel>()
-                        for (i in data) {
-                            if (i.name.lowercase(Locale.getDefault())
+                        val resultList = ArrayList<Meal>()
+                        for (i in filteredData) {
+                            if (i.strMeal.lowercase(Locale.getDefault())
                                     .contains(searchedText.lowercase(Locale.getDefault()))
                             ) {
                                 resultList.add(i)
                             }
                         }
-                       filteredData.addAll(resultList)
+                        filteredData.addAll(resultList)
 
                     }
                     items(filteredData) { category ->
 
 
-                        MealCategory(category, onExpanded = viewModel::onCategoryExpanded) { id ->
-
-                            val route = "${MealsScreens.FILTER_SCREEN.name}/$id"
-                            navController?.navigate(route)
+                        FilterCategory(category) { id ->
+//
+//                            val route = "${MealsScreens.DETAILS_SCREEN.name}/$id"
+//                            navController?.navigate(route)
                         }
 
                     }
 
-                }
+//                }
             }
         }
-    }
 
 
 }
 
 
 @Composable
-fun MealCategory(
-    category: CategoryUiModel,
-    onExpanded: (CategoryUiModel) -> Unit,
+fun FilterCategory(
+    category: Meal,
     navigationCallBack: (String) -> Unit,
 ) {
 
-    var isExpanded by rememberSaveable {
-        mutableStateOf(category.isExpanded)
-    }
 
-    var lineCount by rememberSaveable {
-        mutableStateOf(3)
-    }
 
     Card(
         shape = RoundedCornerShape(dimensionResource(R.dimen.category_card_corner_size)),
@@ -196,95 +240,31 @@ fun MealCategory(
             .fillMaxWidth()
             .padding(15.dp)
             .clickable {
-                navigationCallBack(category.id)
+                navigationCallBack(category.idMeal)
             }
 
     ) {
-        Column(
+        Row(
             Modifier
                 .animateContentSize()
                 .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+//            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
 
             Image(
-                painter = rememberAsyncImagePainter(category.imageUrl),
+                painter = rememberAsyncImagePainter(category.strMealThumb),
                 contentDescription = "Meals Category imgae",
                 modifier = Modifier
                     .size(dimensionResource(id = R.dimen.categroy_image_size))
                     .padding(dimensionResource(R.dimen.category_image_padding))
             )
 
-            Text(text = category.name, style = MaterialTheme.typography.subtitle1)
+            Text(text = category.strMeal, style = MaterialTheme.typography.subtitle1)
 
         }
     }
 
 }
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    MealzAppTheme {
-        MealsCategoriesScreen()
-    }
-}
 
-@Composable
-fun SearchView(state: MutableState<TextFieldValue>) {
-    TextField(
-        value = state.value,
-        onValueChange = { value ->
-            state.value = value
-        },
-        modifier = Modifier
-            .fillMaxWidth(),
-        textStyle = TextStyle(color = Color.White, fontSize = 18.sp),
-        leadingIcon = {
-            Icon(
-                Icons.Default.Search,
-                contentDescription = "",
-                modifier = Modifier
-                    .padding(15.dp)
-                    .size(24.dp)
-            )
-        },
-        trailingIcon = {
-            if (state.value != TextFieldValue("")) {
-                IconButton(
-                    onClick = {
-                        state.value =
-                            TextFieldValue("") // Remove text from TextField when you press the 'X' icon
-                    }
-                ) {
-                    Icon(
-                        Icons.Default.Close,
-                        contentDescription = "",
-                        modifier = Modifier
-                            .padding(15.dp)
-                            .size(24.dp)
-                    )
-                }
-            }
-        },
-        singleLine = true,
-        shape = RectangleShape, // The TextFiled has rounded corners top left and right by default
-        colors = TextFieldDefaults.textFieldColors(
-            textColor = Color.White,
-            cursorColor = Color.White,
-            leadingIconColor = Color.White,
-            trailingIconColor = Color.White,
-            backgroundColor = colorResource(id = R.color.purple_700),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent
-        )
-    )
-}
 
-@Preview(showBackground = true)
-@Composable
-fun SearchViewPreview() {
-    val textState = remember { mutableStateOf(TextFieldValue("")) }
-    SearchView(textState)
-}

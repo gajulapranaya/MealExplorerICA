@@ -13,6 +13,7 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.sample.mealexplorer.ui.screens.LoginScreen
 import com.sample.mealexplorer.ui.screens.MealDetailsScreen
 import com.sample.mealexplorer.ui.screens.MealsCategoriesScreen
+import com.sample.mealexplorer.ui.screens.MealsFilterScreen
 import com.sample.mealexplorer.ui.screens.SignUp
 import com.sample.mealexplorer.ui.screens.SplashScreen
 import com.sample.mealexplorer.ui.viewmodel.MealDetailsViewModel
@@ -22,6 +23,7 @@ const val ARG_MEAL = "MEAL_CATEGORY_ID"
 enum class MealsScreens {
     SPLASH_SCREEN,
     LIST_SCREEN,
+    FILTER_SCREEN,
     DETAILS_SCREEN,
     LOGIN_SCREEN,
     SIGNUP_SCREEN
@@ -54,6 +56,14 @@ fun MealsNavigation() {
 
         composable(route = MealsScreens.LIST_SCREEN.name) {
             MealsCategoriesScreen(navController)
+
+        }
+        val route1 = "${MealsScreens.FILTER_SCREEN.name}/{$ARG_MEAL}"
+        composable(route = route1, arguments = listOf(navArgument(ARG_MEAL) {
+            type = NavType.StringType
+        })) {
+            val viewModel = hiltViewModel<MealDetailsViewModel>()
+            viewModel.mealState?.let { category -> MealsFilterScreen(category, navController) }
         }
 
         val route = "${MealsScreens.DETAILS_SCREEN.name}/{$ARG_MEAL}"

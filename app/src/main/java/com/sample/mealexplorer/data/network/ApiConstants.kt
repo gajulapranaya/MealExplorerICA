@@ -9,5 +9,6 @@ object ApiConstants {
     const val API_URL = "$BASE_URL/$API_VERSION/$API_KEY/"
 
     const val ENDPOINT_CATEGORIES = "categories.php"
+    const val ENDPOINT_FILTER = "filter.php"
 
 }
