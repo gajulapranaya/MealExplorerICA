@@ -10,5 +10,6 @@ object ApiConstants {
 
     const val ENDPOINT_CATEGORIES = "categories.php"
     const val ENDPOINT_FILTER = "filter.php"
+    const val ENDPOINT_LOOK_ID = "lookup.php"
 
 }

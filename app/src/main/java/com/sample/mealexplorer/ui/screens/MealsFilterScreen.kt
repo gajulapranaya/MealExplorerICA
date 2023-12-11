@@ -79,6 +79,7 @@ import com.sample.mealexplorer.data.models.MealUiModel
 import com.sample.mealexplorer.data.models.MealsResponse
 import com.sample.mealexplorer.data.network.ApiService
 import com.sample.mealexplorer.data.network.MealsApi
+import com.sample.mealexplorer.ui.navigations.DestinationScreen
 import com.sample.mealexplorer.ui.states.FilterUiState
 import com.sample.mealexplorer.ui.viewmodel.MealsFilterViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -210,6 +211,11 @@ fun MealsFilterScreen(category: CategoryUiModel, navController: NavHostControlle
 
 
                         FilterCategory(category) { id ->
+
+                            navController.navigate(
+                                route = DestinationScreen.MainScreenDest.getFullRoute(
+                                    category.idMeal)
+                            )
 //
 //                            val route = "${MealsScreens.DETAILS_SCREEN.name}/$id"
 //                            navController?.navigate(route)

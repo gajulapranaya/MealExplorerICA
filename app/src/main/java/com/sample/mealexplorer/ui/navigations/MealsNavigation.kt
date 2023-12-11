@@ -19,6 +19,7 @@ import com.sample.mealexplorer.ui.screens.SplashScreen
 import com.sample.mealexplorer.ui.viewmodel.MealDetailsViewModel
 
 const val ARG_MEAL = "MEAL_CATEGORY_ID"
+const val ARG_MEAL_ID = "MEAL_ID"
 
 enum class MealsScreens {
     SPLASH_SCREEN,
@@ -66,18 +67,34 @@ fun MealsNavigation() {
             viewModel.mealState?.let { category -> MealsFilterScreen(category, navController) }
         }
 
-        val route = "${MealsScreens.DETAILS_SCREEN.name}/{$ARG_MEAL}"
+        val route = DestinationScreen.MainScreenDest.route
         composable(
             route = route,
-            arguments = listOf(navArgument(ARG_MEAL) {
+            arguments = listOf(navArgument(ID_KEY) {
                 type = NavType.StringType
             })
         ) {
-            val viewModel = hiltViewModel<MealDetailsViewModel>()
-            viewModel.mealState?.let { category -> MealDetailsScreen(category, navController) }
+                navBackStackEntry ->
+            val id = navBackStackEntry.arguments?.getString(ID_KEY)
+            if (id != null) {
+                MealDetailsScreen(id, navController)
+            }
+        }
         }
 
     }
 
+const val ID_KEY = "ID_key"
+const val TEXT_KEY = "TEXT_key"
+sealed class DestinationScreen(val route: String) {
+    object SplashScreenDest : DestinationScreen(route = "splash_screen")
+    object MainScreenDest : DestinationScreen(route = "main_screen"+ "/{$ID_KEY}"){
+        fun getFullRoute(id: String): String {
+            return "main_screen" + "/$id"
+        }
+    }
+    object HomeScreenDest : DestinationScreen(route = "home_screen")
+    object LoginScreenDest : DestinationScreen(route = "login_screen")
+    object SignupScreenDest : DestinationScreen(route = "signup_screen")
 }
 

@@ -1,5 +1,6 @@
 package com.sample.mealexplorer.ui.screens
 
+import android.util.Log
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
@@ -42,11 +43,34 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.sample.mealexplorer.data.models.CategoryUiModel
+import com.sample.mealexplorer.data.models.FilterResponse
+import com.sample.mealexplorer.data.models.GetMealByIdResponse
+import com.sample.mealexplorer.data.models.MealX
+import com.sample.mealexplorer.data.network.ApiService
 import com.sample.mealzapp.R
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+object EmptyDataMeal{
+    val meal=GetMealByIdResponse(arrayListOf(MealX("","","","","")))
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MealDetailsScreen(category: CategoryUiModel, navController: NavHostController) {
+fun MealDetailsScreen(category: String, navController: NavHostController) {
+    var emptyData = EmptyDataMeal;
+    var mealsResponse by remember { mutableStateOf<GetMealByIdResponse?>(EmptyDataMeal.meal) }
+    CoroutineScope(Dispatchers.IO).launch {
+        val mealsApi = ApiClient.getInstance().create(ApiService::class.java)
+        val result = mealsApi.getMealsById(category)
+        Log.d("ayush: ", result.body().toString())
+        Log.d("ayush error: ", result.errorBody().toString().toString())
+        if (result.body() != null && result.isSuccessful) {
+            mealsResponse = result.body()!!
+
+            Log.d("ayush: ", result.body()!!.meals.toString())
+
+        }
+    }
 
     var profilePictureState by remember {
         mutableStateOf(ProfilePictureState.Normal)
@@ -111,7 +135,7 @@ fun MealDetailsScreen(category: CategoryUiModel, navController: NavHostControlle
 //                )
             ) {
                 AsyncImage(
-                    model = category.imageUrl,
+                    model = mealsResponse?.meals?.get(0)?.strMealThumb,
                     contentDescription = "Meal image",
                     modifier = Modifier
                         .clip(CircleShape)
@@ -124,14 +148,16 @@ fun MealDetailsScreen(category: CategoryUiModel, navController: NavHostControlle
                         }
                 )
             }
-            Text(text = category.name, style = MaterialTheme.typography.h6)
+            mealsResponse?.meals?.get(0)?.strMeal?.let { Text(text = it, style = MaterialTheme.typography.h6) }
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = category.description,
-                style = MaterialTheme.typography.subtitle1,
-                modifier = Modifier.padding(10.dp),
+            mealsResponse?.meals?.get(0)?.strInstructions?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.subtitle1,
+                    modifier = Modifier.padding(10.dp),
 
-            )
+                    )
+            }
         }
 
 
